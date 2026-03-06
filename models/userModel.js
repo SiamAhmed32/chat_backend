@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const crypto = require('crypto')
 
 const userSchema = mongoose.Schema(
   {
@@ -23,6 +24,8 @@ const userSchema = mongoose.Schema(
       default:
         "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
     },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
   { timestamps: true },
 );
@@ -39,6 +42,12 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+//this function generates a random token and hasshes it
+userSchema.methods.getResetPasswordToken = function(){
+    const resetToken = crypto.randomBytes(10).toString('hex')
+    
+}
 
 const User = mongoose.model("User", userSchema);
 
