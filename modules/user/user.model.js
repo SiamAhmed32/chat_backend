@@ -57,6 +57,20 @@ userSchema.methods.getResetPasswordToken = function () {
   return resetToken; // Return the UNHASHED token for the email
 };
 
+//   user = {
+//     name: "John",
+//     email: "john@gmail.com",
+//     password: "hashedpassword",
+//     resetPasswordToken: "x8f92kd...",         // ← filled ✅ undefined
+//     resetPasswordExpire: 1720000000000        // ← filled ✅
+// undefined
+// }
+// ```
+
+// **After `user.save()`:**
+// ```
+// MongoDB database now has those two fields saved permanently ✅
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
