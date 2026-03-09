@@ -22,12 +22,14 @@ connectDB()
 //built in middleware to parse JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+// console.log(allowedOrigins)
 //middleware to handle cookies and CORS
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    // origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: allowedOrigins,
     //our Next.js client URL
     credentials: true,
   }),
