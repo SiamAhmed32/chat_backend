@@ -3,7 +3,7 @@ const {
   allUsers,
 } = require("./user.controller.js");
 const { protect } = require("../../middlewares/authMiddleware.js");
-const { authUser, registerUser, forgotPassword } = require("./auth.controller.js");
+const { authUser, registerUser, forgotPassword, resetPassword } = require("./auth.controller.js");
 
 const router = express.Router();
 

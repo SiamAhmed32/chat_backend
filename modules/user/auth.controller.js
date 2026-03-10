@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("./user.model");
 const generateToken = require("../../utils/generateToken");
 const sendEmail = require("../../utils/sendEmails"); // Pointing to your utility
+const crypto = require("crypto");
 
 // @desc    Register a new user
 // @route   POST /api/user
@@ -83,7 +84,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetToken = user.getResetPasswordToken();
 
   await user.save({ validateBeforeSave: false });
-  const resetUrl = `${process.env.FRONTEND_URL}/password/rest/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
   const message = `<h1>Password Reset Request</h1>
   <p>Please click the link below to reset your password. This link is valid for 10 minutes only.</p>
@@ -121,7 +122,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     .update(req.params.token)
     .digest("hex");
 
-  const user = await user.findOne({
+  const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
