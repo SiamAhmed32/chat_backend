@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
 //internal imports
-const userRoutes = require('./routes/userRoutes')
+const userRoutes = require('./modules/user/user.routes')
 const { notFoundHandler, errorHandler } = require("./middlewares/errorMiddleware");
 
 //load environment variables

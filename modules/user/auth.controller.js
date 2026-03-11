@@ -1,49 +1,57 @@
 const asyncHandler = require("express-async-handler");
 const User = require("./user.model");
 const generateToken = require("../../utils/generateToken");
-const sendEmail = require("../../utils/sendEmails"); // Pointing to your utility
+const sendEmail = require("../../utils/sendEmail"); // Pointing to your utility
 const crypto = require("crypto");
+const { registerUserService } = require("./user.service");
 
 // @desc    Register a new user
 // @route   POST /api/user
 // @access  Public
 
-const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, avatar } = req.body;
+// const registerUser = asyncHandler(async (req, res) => {
+//   const { name, email, password, avatar } = req.body;
 
-  //entered all thefields checking
-  if (!name || !email || !password) {
-    res.status(400);
-    throw new Error("Please Enter All The Fields");
-  }
+//   //entered all thefields checking
+//   if (!name || !email || !password) {
+//     res.status(400);
+//     throw new Error("Please Enter All The Fields");
+//   }
 
-  //checking if user exists
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    res.status(400);
-    throw new Error("User Already Exist");
-  }
+//   //checking if user exists
+//   const userExists = await User.findOne({ email });
+//   if (userExists) {
+//     res.status(400);
+//     throw new Error("User Already Exist");
+//   }
 
-  //creating new user
-  const user = await User.create({
-    name,
-    email,
-    password,
-    avatar,
-  });
-  if (user) {
-    res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Failed to create user");
-  }
-});
+//   //creating new user
+//   const user = await User.create({
+//     name,
+//     email,
+//     password,
+//     avatar,
+//   });
+//   if (user) {
+//     res.status(200).json({
+//       _id: user._id,
+//       name: user.name,
+//       email: user.email,
+//       avatar: user.avatar,
+//       token: generateToken(user._id),
+//     });
+//   } else {
+//     res.status(400);
+//     throw new Error("Failed to create user");
+//   }
+// });
+
+// better option
+// @desc    Register a new user
+const registerUser = asyncHandler(async(req, res)=>{
+  const result = await registerUserService(req.body)
+  res.status(201).json(result)
+})
 
 // @desc    Auth the user & get token (Login)
 // @route   POST /api/user/login
@@ -111,6 +119,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
     throw new Error("Email could not be sent. Please try again later.");
   }
 });
+
+// @desc    Forgot Password
+const forgotPassword = asyncHandler(async (req, res)=>{
+  const result = await 
+})
 
 // @desc    Reset Password (Actual Update)
 // @route   PUT /api/user/resetpassword/:token
