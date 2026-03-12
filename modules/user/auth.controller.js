@@ -3,7 +3,7 @@ const User = require("./user.model");
 const generateToken = require("../../utils/generateToken");
 const sendEmail = require("../../utils/sendEmail"); // Pointing to your utility
 const crypto = require("crypto");
-const { registerUserService } = require("./user.service");
+const { registerUserService, forgotPasswordService, resetPasswordService } = require("./user.service");
 
 // @desc    Register a new user
 // @route   POST /api/user
@@ -80,78 +80,86 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/user/forgotpassword
 // @access  Public
 
-const forgotPassword = asyncHandler(async (req, res) => {
-  const { email } = req.body;
+// const forgotPassword = asyncHandler(async (req, res) => {
+//   const { email } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(404);
-    throw new Error("User with this email does not exist");
-  }
+//   const user = await User.findOne({ email });
+//   if (!user) {
+//     res.status(404);
+//     throw new Error("User with this email does not exist");
+//   }
 
-  const resetToken = user.getResetPasswordToken();
+//   const resetToken = user.getResetPasswordToken();
 
-  await user.save({ validateBeforeSave: false });
-  const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+//   await user.save({ validateBeforeSave: false });
+//   const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
-  const message = `<h1>Password Reset Request</h1>
-  <p>Please click the link below to reset your password. This link is valid for 10 minutes only.</p>
-  <a href="${resetUrl}"
-  clicktracking=off>${resetUrl}</a>
-  <p>If you did not request this, please ignore this email.</p>
-  `;
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: "Password reset Request",
-      message,
-    });
-    res.status(200).json({
-      success: true,
-      message: `Reset link sent to ${user.email}`,
-    });
-  } catch (error) {
-    // If email fails, don't leave zombie data in the DB
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-    res.status(500);
-    throw new Error("Email could not be sent. Please try again later.");
-  }
-});
+//   const message = `<h1>Password Reset Request</h1>
+//   <p>Please click the link below to reset your password. This link is valid for 10 minutes only.</p>
+//   <a href="${resetUrl}"
+//   clicktracking=off>${resetUrl}</a>
+//   <p>If you did not request this, please ignore this email.</p>
+//   `;
+//   try {
+//     await sendEmail({
+//       email: user.email,
+//       subject: "Password reset Request",
+//       message,
+//     });
+//     res.status(200).json({
+//       success: true,
+//       message: `Reset link sent to ${user.email}`,
+//     });
+//   } catch (error) {
+//     // If email fails, don't leave zombie data in the DB
+//     user.resetPasswordToken = undefined;
+//     user.resetPasswordExpire = undefined;
+//     await user.save({ validateBeforeSave: false });
+//     res.status(500);
+//     throw new Error("Email could not be sent. Please try again later.");
+//   }
+// });
 
 // @desc    Forgot Password
 const forgotPassword = asyncHandler(async (req, res)=>{
-  const result = await 
+  const result = await forgotPasswordService(req.body.email)
+  res.status(200).json(result)
 })
 
 // @desc    Reset Password (Actual Update)
 // @route   PUT /api/user/resetpassword/:token
 // @access  Public
 
-const resetPassword = asyncHandler(async (req, res) => {
-  const resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
+// const resetPassword = asyncHandler(async (req, res) => {
+//   const resetPasswordToken = crypto
+//     .createHash("sha256")
+//     .update(req.params.token)
+//     .digest("hex");
 
-  const user = await User.findOne({
-    resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() },
-  });
-  if (!user) {
-    res.status(400);
-    throw new Error("Invalid or expired password reset token");
-  }
-  user.password = req.body.password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-  await user.save();
+//   const user = await User.findOne({
+//     resetPasswordToken,
+//     resetPasswordExpire: { $gt: Date.now() },
+//   });
+//   if (!user) {
+//     res.status(400);
+//     throw new Error("Invalid or expired password reset token");
+//   }
+//   user.password = req.body.password;
+//   user.resetPasswordToken = undefined;
+//   user.resetPasswordExpire = undefined;
+//   await user.save();
 
-  res.status(200).json({
-    success: true,
-    message: "Password reset successful! You can now log in.",
-  });
-});
+//   res.status(200).json({
+//     success: true,
+//     message: "Password reset successful! You can now log in.",
+//   });
+// });
+
+
+// @desc    Reset Password
+const resetPassword = asyncHandler(async(req, res)=>{
+  const result = await resetPasswordService(req.params.token, req.body.password)
+  res.status(200).json(result)
+})
 
 module.exports = { registerUser, authUser, forgotPassword, resetPassword };
